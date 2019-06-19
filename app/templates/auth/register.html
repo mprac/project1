@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Create New Account
+{% endblock %}
+
+{% block body %}
+<h1>Register to Review Website</h1>
+<form action="{{ url_for('register')}}" method="POST">
+    {{ form.csrf_token }}
+    {{ form.email(size=20, placeholder="Email") }}
+    <input type="text" name="username" placeholder="User Name" required>
+    <input type="password" name="password" id="password" placeholder="password" required>
+    <button type="submit">Sign Up</button>
+</form>
+{% if message is defined %}
+<div class="alert alert-danger" role="alert">
+    {{ message }}
+</div>
+{% endif %}
+
+
+{% endblock %}

@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Login
+{% endblock %}
+
+{% block body %}
+<h1>Register Review Website</h1>
+<form action="{{ url_for('login')}}" method="POST">
+    <input type="text" name="email" placeholder="email" required>
+    <input type="password" name="password" id="password" placeholder="password" required>
+    <button type="submit">login</button>
+</form>
+{% if message is defined %}
+<div class="alert alert-danger" role="alert">
+    {{ message }}
+</div>
+{% endif %}
+{% endblock %}
