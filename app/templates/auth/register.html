@@ -7,8 +7,7 @@ Create New Account
 {% block body %}
 <h1>Register to Review Website</h1>
 <form action="{{ url_for('register')}}" method="POST">
-    {{ form.csrf_token }}
-    {{ form.email(size=20, placeholder="Email") }}
+    <input type="email" name="email" placeholder="Email" required>
     <input type="text" name="username" placeholder="User Name" required>
     <input type="password" name="password" id="password" placeholder="password" required>
     <button type="submit">Sign Up</button>

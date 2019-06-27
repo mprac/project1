@@ -2,13 +2,12 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     email VARCHAR NOT NULL UNIQUE,
     username VARCHAR NOT NULL UNIQUE,
-    password VARCHAR NOT NULL,
-    is_active VARCHAR
+    password VARCHAR NOT NULL
 );
 -- isbn,title,author,year
 CREATE TABLE books (
     id SERIAL PRIMARY KEY,
-    isbn INTEGER NOT NULL,
+    isbn VARCHAR NOT NULL UNIQUE,
     title VARCHAR NOT NULL,
     author VARCHAR NOT NULL,
     year INTEGER NOT NULL
