@@ -13,12 +13,18 @@ Flights
 {% endfor %} --> 
 <h1>welcome {{ username }} </h1>
 
+<form action="{{url_for('index')}}" method="POST">
+<input type="input" name="search" id="" placeholder="search books">
+<button type="submit">Search</button>
+</form>
+
 <ul>
+{% for result in results %}
+<li> {{ result[1] }} {{ result[2] }} {{ result[3] }} {{ result[4] }}</li>
 
-
-
+{% endfor %}
+{{error}}
 </ul>
-
 
 {% endblock %}
 

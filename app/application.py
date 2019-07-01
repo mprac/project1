@@ -1,4 +1,5 @@
 import os
+import psycopg2
 
 from flask import Flask, session, render_template, request, redirect, url_for
 from flask_session import Session
@@ -23,12 +24,21 @@ engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
 
-@app.route("/")
+@app.route("/", methods=["GET", "POST"])
 def index():
     if 'user' in session:
         username = session['user']
-        return render_template('index.html', username=username)
+        ## BEGIN SEARCH ##
+        conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+        cur = conn.cursor()
+        search = "%" + str(request.form.get("search")).title() + "%"
+        cur.execute("SELECT * FROM books WHERE title LIKE %s OR isbn LIKE %s OR author LIKE %s",(search,search,search,)) 
+        results = cur.fetchall()
+        ## END SEARCH ##
+        return render_template('index.html', username=username, results=results)
     return redirect(url_for('login'))
+
+   
 
 ########## Register - Login - Logout ##########
 @app.route("/auth/register", methods=["GET", "POST"])
