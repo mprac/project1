@@ -6,5 +6,9 @@ cur = conn.cursor()
 user_input = input('search value')
 search = "%" + str(user_input).title() + "%"
 cur.execute("SELECT * FROM books WHERE title LIKE %s OR isbn LIKE %s OR author LIKE %s", (search,search,search,))
-for record in cur:
-    print(record)
+if cur.rowcount == 0:
+    error = "error"
+    print(error)
+else:
+    for record in cur:
+        print(record)
