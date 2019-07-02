@@ -29,12 +29,12 @@ def index():
     if 'user' in session:
         username = session['user']
         ## BEGIN SEARCH ##
-        conn = psycopg2.connect(os.getenv("DATABASE_URL"))
-        cur = conn.cursor()
+        # conn = psycopg2.connect(os.getenv("DATABASE_URL"))
+        # cur = conn.cursor()
         search = "%" + str(request.form.get("search")).title() + "%"
-        cur.execute("SELECT * FROM books WHERE title LIKE %s OR isbn LIKE %s OR author LIKE %s",(search,search,search,)) 
+        cur.execute("SELECT * FROM books WHERE title LIKE %s OR isbn LIKE %s OR author LIKE %s",(search,search,search,))
         results = cur.fetchall()
-        ## END SEARCH ##
+        ## END SEARCH ##   
         return render_template('index.html', username=username, results=results)
     return redirect(url_for('login'))
 
