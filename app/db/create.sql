@@ -16,8 +16,8 @@ CREATE TABLE books (
 -- 
 CREATE TABLE reviews (
     id SERIAL PRIMARY KEY, 
-    review_count INTEGER NOT NULL,
-    average_score FLOAT NOT NULL,
+    review VARCHAR NOT NULL,
+    user_id  INTEGER REFERENCES users,
     book_id INTEGER REFERENCES books
 );
 -- JOIN
