@@ -2,3 +2,4 @@ flask_session
 app/flask_session
 .env
 *.pyc
+*.pyc
