@@ -93,7 +93,13 @@ def logout():
 ########## END Register - Login - Logout ##########
 
 ########## Book Page Review Submissions ##########
-#app.route("/book/<int:book_id>")
-#def book(book_id):
-
+@app.route("/book/<int:id>")
+def book(id):
+    if 'user' in session:
+        username = session['user']
+        book = db.execute('SELECT * FROM books WHERE id=:id', {'id':id}).fetchone()
+        if book is None:
+            return redirect(url_for('index'))
+        return render_template('book.html', username=username,book=book)
+    return redirect(url_for('index'))
 ########## END Book Page Review Submissions ##########

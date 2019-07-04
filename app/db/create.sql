@@ -20,5 +20,12 @@ CREATE TABLE reviews (
     user_id  INTEGER REFERENCES users,
     book_id INTEGER REFERENCES books
 );
+
+-- CREATE TYPE rating AS ENUM (1,2,3,4,5);
+-- CREATE TABLE ratings (
+--     id SERIAL PRIMARY KEY,
+--     rating rating,
+--     book_id INTEGER REFERENCES books 
+-- );
 -- JOIN
--- SELECT title, author, year, average_score FROM books JOIN reviews ON reviews.book_id = books.id; 
+-- SELECT title, author, year, review FROM books JOIN reviews ON reviews.book_id = books.id; 

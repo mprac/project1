@@ -19,8 +19,10 @@ Flights
 </form>
 
 <ul>
-{% for result in results %}
-<li> {{ result[1] }} {{ result[2] }} {{ result[3] }} {{ result[4] }}</li>
+{% for book in results %}
+<a href="{{ url_for('book', id=book[0]) }}">
+<li> {{ book[1] }} {{ book[2] }} {{ book[3] }} {{ book[4] }}</li>
+</a>
 {% endfor %} 
 </ul>
 {% if error is defined %}
