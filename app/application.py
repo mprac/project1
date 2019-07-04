@@ -23,7 +23,6 @@ Session(app)
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
-
 @app.route("/", methods=["GET", "POST"])
 def index():
     if 'user' in session:
@@ -32,17 +31,21 @@ def index():
         if request.method == "POST":
             conn = psycopg2.connect(os.getenv("DATABASE_URL"))
             cur = conn.cursor()
+            # assign search variable to post request from search form. 
+            # "%" used to allow anything before or after search input to display a list of possible matches
             search = "%" + str(request.form.get("search")).title() + "%"
+            #execute cursor to select results based on search term.
             cur.execute("SELECT * FROM books WHERE title LIKE %s OR isbn LIKE %s OR author LIKE %s",(search,search,search,))
-            if cur.rowcount == 0:
+            #If statement to check and execute result based on multi conditional outcome. 
+            if cur.rowcount == 0 or cur.rowcount == 5000:
                 return render_template('index.html', username=username, error="Your search returned no results")
-            ## END SEARCH ##   
+            #return results and render template
             return render_template('index.html', username=username, results=cur)
+            #close the cursor
             cur.close()
+            ## END SEARCH ##  
         return render_template('index.html', username=username)
     return redirect(url_for('login'))
-
-   
 
 ########## Register - Login - Logout ##########
 @app.route("/auth/register", methods=["GET", "POST"])
@@ -61,7 +64,7 @@ def register():
             return render_template("auth/register.html", message="email or username already exist")
         db.commit()               
         return render_template('auth/success.html')
-        
+    #if user is not in session render template    
     return render_template("auth/register.html") 
 
 @app.route("/auth/login", methods=["GET", "POST"])
@@ -88,3 +91,15 @@ def logout():
     session.pop('user', None)
     return redirect(url_for('login'))
 ########## END Register - Login - Logout ##########
+
+########## Book Page Review Submissions ##########
+@app.route("/book/<int:id>")
+def book(id):
+    if 'user' in session:
+        username = session['user']
+        book = db.execute('SELECT * FROM books WHERE id=:id', {'id':id}).fetchone()
+        if book is None:
+            return redirect(url_for('index'))
+        return render_template('book.html', username=username,book=book)
+    return redirect(url_for('index'))  
+########## END Book Page Review Submissions ##########
