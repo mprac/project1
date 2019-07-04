@@ -1,5 +1,6 @@
 __pycache__
 flask_session
 app/flask_session
-app/__pycache__
+app/__pycache__/*.pyc
 .env
+*.pyc
