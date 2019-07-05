@@ -13,7 +13,10 @@ Book | {{ book[2] }}
 {% endfor %} --> 
 <h1>welcome {{ username }} </h1>
 {{ book[2] }}
-
+<form action="{{ url_for('review') }}" method="POST">
+  <input type="text" name="review" id="" placeholder="Write a review" required>
+  <button type="submit">Submit review</button>
+</form>
 
 
 {% endblock %}
