@@ -101,5 +101,9 @@ def book(id):
         if book is None:
             return redirect(url_for('index'))
         return render_template('book.html', username=username,book=book)
-    return redirect(url_for('index'))  
+    return redirect(url_for('index'))
+
+# @app.route("/review")
+# def review():
+
 ########## END Book Page Review Submissions ##########
