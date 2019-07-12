@@ -4,3 +4,4 @@ app/flask_session
 *.pyc
 app/__pycache__/application.cpython-37.pyc
 app/__pycache__/__init__.cpython-37.pyc
+
