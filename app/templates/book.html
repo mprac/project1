@@ -8,15 +8,30 @@ Book | {{ book[2] }}
 <form action="{{ url_for('logout') }}" method="GET">
   <button type="submit">log out</button>
 </form>
-<!-- {% for user in username or [] %}
-<h1>welcome {{ user|e }} </h1>
-{% endfor %} --> 
-<h1>welcome {{ username }} </h1>
-{{ book[2] }}
+{% with flashmessages = get_flashed_messages() %}
+  {% if flashmessages %}
+    {% for flashmessage in flashmessages %}
+      <h3>{{ flashmessage }}</h3>
+    {% endfor %}
+  {% endif %}
+{% endwith%}
+<h1>welcome {{ username }}</h1>
+{{ book[2] }} {{ book[0] }}
 <form action="{{ url_for('review') }}" method="POST">
   <input type="text" name="review" id="" placeholder="Write a review" required>
+  <input type="hidden" name="book_id" value="{{ book[0] }}">
+  <input type="hidden" name="user_id" value="{{ user_id[0] }}">
   <button type="submit">Submit review</button>
 </form>
 
+<ul>
+
+{% for review in reviews %}
+  {% if book[0] == review[3] %}
+    <li>{{ username }}:{{ review[1] }}</li>
+  {% endif %}
+{% endfor %}
+
+</ul>
 
 {% endblock %}

@@ -13,19 +13,18 @@ CREATE TABLE books (
     year INTEGER NOT NULL
     
 );
--- 
-CREATE TABLE reviews (
-    id SERIAL PRIMARY KEY, 
-    review VARCHAR NOT NULL,
-    user_id  INTEGER REFERENCES users,
+CREATE TABLE ratings (
+    id SERIAL PRIMARY KEY,
+    rating INTEGER NOT NULL,
+    user_id  INTEGER REFERENCES users ON DELETE CASCADE,
     book_id INTEGER REFERENCES books
 );
+CREATE TABLE reviews (
+    id SERIAL PRIMARY KEY,
+    review VARCHAR NOT NULL,
+    user_id  INTEGER REFERENCES users ON DELETE CASCADE,
+    book_id INTEGER REFERENCES books
 
--- CREATE TYPE rating AS ENUM (1,2,3,4,5);
--- CREATE TABLE ratings (
---     id SERIAL PRIMARY KEY,
---     rating rating,
---     book_id INTEGER REFERENCES books 
--- );
+);
 -- JOIN
 -- SELECT title, author, year, review FROM books JOIN reviews ON reviews.book_id = books.id; 

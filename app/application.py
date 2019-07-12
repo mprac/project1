@@ -1,7 +1,7 @@
 import os
 import psycopg2
 
-from flask import Flask, session, render_template, request, redirect, url_for
+from flask import Flask, session, render_template, request, redirect, url_for, flash
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
@@ -9,6 +9,7 @@ from sqlalchemy.exc import IntegrityError
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
+app.secret_key = "fksjdnfksdnfiwnfimbj3249vidunv"
 
 # Check for environment variable
 if not os.getenv("DATABASE_URL"):
@@ -82,7 +83,7 @@ def login():
         else:
             session['user'] = user.username
             return redirect(url_for('index'))
-            db.commit()
+
         return render_template('auth/login.html', message=message)
     return render_template('auth/login.html')
 
@@ -98,12 +99,35 @@ def book(id):
     if 'user' in session:
         username = session['user']
         book = db.execute('SELECT * FROM books WHERE id=:id', {'id':id}).fetchone()
+        user_id = db.execute('SELECT id FROM users WHERE username=:username', {'username': username}).fetchone()
+        reviews = db.execute('SELECT * FROM reviews')
         if book is None:
             return redirect(url_for('index'))
-        return render_template('book.html', username=username,book=book)
+        return render_template('book.html', username=username,book=book,user_id=user_id, reviews=reviews)
     return redirect(url_for('index'))
 
-# @app.route("/review")
-# def review():
+@app.route("/review", methods=["POST"])
+def review():
+    if 'user' in session:
+        username = session['user']
+        if request.method == "POST":
+            review = request.form.get('review')
+            book_id = request.form.get('book_id')
+            user_id = request.form.get('user_id')
+            reviewed = db.execute('SELECT * FROM reviews WHERE user_id=:user_id and book_id=:book_id ',{'user_id': user_id,'book_id': book_id}).fetchone()
+            if reviewed:
+                flash('you already reviewed this book')
+                return redirect(url_for('book', id=book_id))
+            elif not review:
+                flash('cannot submit empty review')
+                return redirect(url_for('book', id=book_id))
+            else:
+                db.execute("INSERT INTO reviews (review, book_id, user_id) VALUES (:review, :book_id, :user_id)", {"review": review,"book_id": book_id, "user_id": user_id})
+                db.commit()
+
+                flash('your review is submitted')
+                return redirect(url_for('book', id=book_id))
+            
+            
 
 ########## END Book Page Review Submissions ##########
