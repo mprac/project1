@@ -5,49 +5,40 @@ Flights
 {% endblock %}
 
 {% block body %}
-<form action="{{ url_for('logout') }}" method="GET">
-  <button type="submit">log out</button>
-</form>
-<!-- {% for user in username or [] %}
-<h1>welcome {{ user|e }} </h1>
-{% endfor %} --> 
+
 <h1>welcome {{ username }} </h1>
 
-<form action="{{url_for('index')}}" method="POST">
-<input type="input" name="search" id="" placeholder="search books" required>
-<button type="submit">Search</button>
-</form>
+{% if results %}
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Link</th>
+      <th scope="col">Title</th>
+      <th scope="col">Author</th>
+      <th scope="col">Year</th>
+      <th scope="col">Isbn</th>
+    </tr>
+  </thead>
+  <tbody>
+      {% for book in results %}
+    <tr>
+      <th><a href="{{ url_for('book', id=book[0]) }}"><button>Visit</button></a></th>
+      <td><a href="{{ url_for('goodreadsapi', isbn=book[1]) }}">{{ book[1] }}</a></td>
+      <td>{{ book[2] }}</td>
+      <td>{{ book[3] }}</td>
+      <td>{{ book[4] }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
 
-<ul>
-{% for book in results %}
-<a href="{{ url_for('book', id=book[0]) }}">
-<li> {{ book[1] }} {{ book[2] }} {{ book[3] }} {{ book[4] }}</li>
-</a>
-{% endfor %} 
-</ul>
 {% if error is defined %}
 <div class="alert alert-danger" role="alert">
-{{ error }}
+  {{ error }}
 </div>
 {% endif %}
 
 
 
 {% endblock %}
-
-<!-- {
-    "books": [
-      {
-        "average_rating": "4.07", 
-        "id": 29207858, 
-        "isbn": "1632168146", 
-        "isbn13": "9781632168146", 
-        "ratings_count": 0, 
-        "reviews_count": 2, 
-        "text_reviews_count": 0, 
-        "work_ratings_count": 28, 
-        "work_reviews_count": 124, 
-        "work_text_reviews_count": 10
-      }
-    ]
-  } -->

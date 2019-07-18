@@ -1,11 +1,13 @@
 import os
-import psycopg2
+#import psycopg2
+import requests
 
-from flask import Flask, session, render_template, request, redirect, url_for, flash
+from flask import Flask, session, render_template, request, redirect, url_for, flash, jsonify
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -20,7 +22,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Set up database
+# Set up database in .env
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
@@ -30,20 +32,13 @@ def index():
         username = session['user']
         ## BEGIN SEARCH ##
         if request.method == "POST":
-            conn = psycopg2.connect(os.getenv("DATABASE_URL"))
-            cur = conn.cursor()
-            # assign search variable to post request from search form. 
-            # "%" used to allow anything before or after search input to display a list of possible matches
             search = "%" + str(request.form.get("search")).title() + "%"
-            #execute cursor to select results based on search term.
-            cur.execute("SELECT * FROM books WHERE title LIKE %s OR isbn LIKE %s OR author LIKE %s",(search,search,search,))
-            #If statement to check and execute result based on multi conditional outcome. 
-            if cur.rowcount == 0 or cur.rowcount == 5000:
-                return render_template('index.html', username=username, error="Your search returned no results")
-            #return results and render template
-            return render_template('index.html', username=username, results=cur)
-            #close the cursor
-            cur.close()
+            if search:
+                results = db.execute("SELECT * FROM books WHERE title LIKE :title or isbn LIKE :isbn or author LIKE :author LIMIT 20", {"title":search,"isbn":search,"author":search})
+                if results.rowcount == 0:
+                    return render_template('index.html', username=username, error="Your search returned no results")
+                else:
+                    return render_template('index.html', username=username, results=results)
             ## END SEARCH ##  
         return render_template('index.html', username=username)
     return redirect(url_for('login'))
@@ -100,21 +95,32 @@ def book(id):
         username = session['user']
         book = db.execute('SELECT * FROM books WHERE id=:id', {'id':id}).fetchone()
         user_id = db.execute('SELECT id FROM users WHERE username=:username', {'username': username}).fetchone()
-        reviews = db.execute('SELECT * FROM reviews')
+        reviews = db.execute('SELECT * FROM reviews JOIN users ON reviews.user_id = users.id')
+        rating_average = db.execute('SELECT TRUNC(AVG(rating), 2) FROM reviews WHERE book_id=:id',{'id':id})
+        # get goodreads ratings
+        isbn = db.execute('SELECT isbn FROM books WHERE id=:id', {'id':id}).fetchone()
+        res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": "eNLoXytUL2ZxAVY6gxVwEw", "isbns":isbn})
+        gr_data = res.json()
+        gr_average_rating = gr_data["books"][0]["average_rating"]
+        gr_ratings_count = gr_data["books"][0]["ratings_count"]
         if book is None:
             return redirect(url_for('index'))
-        return render_template('book.html', username=username,book=book,user_id=user_id, reviews=reviews)
+        return render_template('book.html', username=username,book=book,user_id=user_id, reviews=reviews, rating_average=rating_average, gr_average_rating=gr_average_rating, gr_ratings_count=gr_ratings_count)
     return redirect(url_for('index'))
 
-@app.route("/review", methods=["POST"])
+@app.route("/review", methods=["POST", "GET"])
 def review():
     if 'user' in session:
         username = session['user']
         if request.method == "POST":
             review = request.form.get('review')
+            rating = request.form.get('rating')
             book_id = request.form.get('book_id')
             user_id = request.form.get('user_id')
-            reviewed = db.execute('SELECT * FROM reviews WHERE user_id=:user_id and book_id=:book_id ',{'user_id': user_id,'book_id': book_id}).fetchone()
+            if rating > str(5) or rating < str(1):
+                flash('error with review')
+                return redirect(url_for('book', id=book_id))
+            reviewed = db.execute('SELECT * FROM reviews WHERE user_id=:user_id and book_id=:book_id',{'user_id': user_id,'book_id': book_id}).fetchone()
             if reviewed:
                 flash('you already reviewed this book')
                 return redirect(url_for('book', id=book_id))
@@ -122,12 +128,41 @@ def review():
                 flash('cannot submit empty review')
                 return redirect(url_for('book', id=book_id))
             else:
-                db.execute("INSERT INTO reviews (review, book_id, user_id) VALUES (:review, :book_id, :user_id)", {"review": review,"book_id": book_id, "user_id": user_id})
+                db.execute("INSERT INTO reviews (review, rating, book_id, user_id) VALUES (:review, :rating, :book_id, :user_id)", {"review": review,"rating": rating, "book_id": book_id, "user_id": user_id})
                 db.commit()
 
                 flash('your review is submitted')
                 return redirect(url_for('book', id=book_id))
-            
-            
+    return redirect(url_for('index'))           
 
 ########## END Book Page Review Submissions ##########
+########## Begin API book review ##########
+@app.route('/api/<isbn>', methods=["GET"])
+def goodreadsapi(isbn):
+    if 'user' in session:
+        username = session['user']
+        if request.method == "GET":
+            book = db.execute('SELECT * FROM books WHERE isbn=:isbn', {'isbn':isbn}).fetchone()
+            average_score = db.execute('SELECT TRUNC(AVG(rating), 2) FROM reviews JOIN books ON reviews.book_id = books.id AND isbn=:isbn', {'isbn':isbn}).fetchone()
+            review_count = db.execute('SELECT COUNT(rating) FROM reviews JOIN books ON reviews.book_id = books.id AND isbn=:isbn', {'isbn':isbn})
+            if book is None:
+                return render_template('404.html'), 404
+            ## BROKEN for no reviews and ratings ##
+            if average_score is None and review_count is None:
+                score = int(0)
+                count = int(0)
+            else:
+                score = [float(row) for row in average_score]
+                count = [int(row[0]) for row in review_count]
+            return jsonify({
+                "title": book.title,
+                "author": book.author,
+                "year": book.year,
+                "isbn": book.isbn,
+                "average_score": score,
+                "review_count": count
+            })
+    return redirect(url_for('login'))
+        
+        
+  

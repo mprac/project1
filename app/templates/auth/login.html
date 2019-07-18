@@ -1,16 +1,18 @@
-{% extends "layout.html" %}
+{% extends "auth/layout.html" %}
 
 {% block title %}
 Login
 {% endblock %}
-
+{% block login %}
+<form class="form-inline my-2 my-lg-0" action="{{ url_for('login')}}" method="POST">
+    <input class="form-control mr-sm-2" type="text" name="email" placeholder="email" required>
+    <input class="form-control mr-sm-2" type="password" name="password" id="password" placeholder="password" required>
+    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Login</button>
+</form>
+{% endblock %}
 {% block body %}
 <h1>Login to Book Website</h1>
-<form action="{{ url_for('login')}}" method="POST">
-    <input type="text" name="email" placeholder="email" required>
-    <input type="password" name="password" id="password" placeholder="password" required>
-    <button type="submit">login</button>
-</form>
+
 {% if message is defined %}
 <div class="alert alert-danger" role="alert">
     {{ message }}
