@@ -6,8 +6,8 @@ from flask import Flask, session, render_template, request, redirect, url_for, f
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.sql import func
+#from sqlalchemy.exc import IntegrityError
+#from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -147,13 +147,16 @@ def goodreadsapi(isbn):
             review_count = db.execute('SELECT COUNT(rating) FROM reviews JOIN books ON reviews.book_id = books.id AND isbn=:isbn', {'isbn':isbn})
             if book is None:
                 return render_template('404.html'), 404
-            ## BROKEN for no reviews and ratings ##
-            if average_score is None and review_count is None:
-                score = int(0)
-                count = int(0)
-            else:
-                score = [float(row) for row in average_score]
-                count = [int(row[0]) for row in review_count]
+            for row in average_score:
+                if row:
+                    score = float(row)
+                else:
+                    score = 0
+            for row in review_count:
+                if row:
+                    count = row[0]
+                else:
+                    count = 0
             return jsonify({
                 "title": book.title,
                 "author": book.author,
