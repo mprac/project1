@@ -1,13 +1,10 @@
 import os
-#import psycopg2
 import requests
 
-from flask import Flask, session, render_template, request, redirect, url_for, flash, jsonify
+from flask import Flask, session, render_template, request, redirect, url_for, flash, jsonify, abort
 from flask_session import Session
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
-#from sqlalchemy.exc import IntegrityError
-#from sqlalchemy.sql import func
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
@@ -22,7 +19,7 @@ app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
-# Set up database in .env
+# Set up database in .env file
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
 
@@ -60,6 +57,7 @@ def register():
             return render_template("auth/register.html", message="email or username already exist")
         db.commit()               
         return render_template('auth/success.html')
+
     #if user is not in session render template    
     return render_template("auth/register.html") 
 
@@ -146,7 +144,7 @@ def goodreadsapi(isbn):
             average_score = db.execute('SELECT TRUNC(AVG(rating), 2) FROM reviews JOIN books ON reviews.book_id = books.id AND isbn=:isbn', {'isbn':isbn}).fetchone()
             review_count = db.execute('SELECT COUNT(rating) FROM reviews JOIN books ON reviews.book_id = books.id AND isbn=:isbn', {'isbn':isbn})
             if book is None:
-                return render_template('404.html'), 404
+                abort(404)
             for row in average_score:
                 if row:
                     score = float(row)
