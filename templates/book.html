@@ -9,6 +9,7 @@ Book | {{ book[2] }}
   book title plus goodreads reviews
 -->
 <h1>{{ book[2] }}</h1>
+<p>ISBN: <a href="{{ url_for('goodreadsapi', isbn=book[1]) }}">{{ book[1] }}</a> &VerticalSeparator; Author: {{ book[3] }} &VerticalSeparator; Year: {{ book[4] }}</p>
 <table class="table table-bordered center-bookview">
   <thead>
     <tr>
