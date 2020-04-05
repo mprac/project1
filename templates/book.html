@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+
+{% block title %}
+Book | {{ book[2] }}
+{% endblock %}
+
+{% block body %}
+<!--
+  book title plus goodreads reviews
+-->
+<h1>{{ book[2] }}</h1>
+<table class="table table-bordered center-bookview">
+  <thead>
+    <tr>
+      <th colspan="2">Ratings From goodreads.com</th>
+    </tr>
+  </thead>
+  <thead class="thead-bg-bookview">
+    <tr>
+      <th scope="col">Total Ratings</th>
+      <th scope="col">Avg Rating</th>
+    </tr>
+  </thead>
+  <tr>
+    <td>{{ gr_ratings_count }}</td>
+    <td>{{ gr_average_rating }}</td>
+  </tr>
+
+</table>
+<!--
+  Error messages using flasks flash 
+-->
+{% with flashmessages = get_flashed_messages() %}
+{% if flashmessages %}
+{% for flashmessage in flashmessages %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <strong>{{ flashmessage }}</strong>
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+{% endfor %}
+{% endif %}
+{% endwith%}
+<!--
+  Submit review 
+-->
+<form class="center-bookview" action="{{ url_for('review') }}" method="POST">
+  <div class="input-group">
+    <input type="hidden" name="book_id" value="{{ book[0] }}">
+    <input type="hidden" name="user_id" value="{{ user_id[0] }}">
+    <input class="form-control" type="text" name="review" id="" placeholder="Write a review" required>
+    <select class="custom-select" id="rating" name="rating">
+      <option value="1">1 star</option>
+      <option value="2">2 stars</option>
+      <option value="3">3 stars</option>
+      <option value="4">4 stars</option>
+      <option value="5">5 stars</option>
+    </select>
+    <div class="input-group-append">
+      <button class="btn btn-outline-success" type="submit">Submit</button>
+    </div>
+  </div>
+</form>
+<!--
+  Website reviews and ratings
+-->
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th scope="col">Name</th>
+      <th scope="col">Comment</th>
+      {% if rating_average %}
+      {% for rating in rating_average %}
+      <th scope="col"> {{ rating[0] }} Avg Rating </th>
+      {% endfor %}
+      {% endif %}
+    </tr>
+  </thead>
+  <tbody>
+    {% for review in reviews %}
+    {% if book[0] == review[4] %}
+
+    <tr>
+      <td class="capitalize-bookview">{{ review[7] }}</td>
+      <td class="capitalize-bookview">{{ review[1] }}</td>
+      <td>{{ review[2]}} Star</td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+  </tbody>
+</table>
+
+
+
+{% endblock %}

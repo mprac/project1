@@ -1,12 +1,10 @@
 {% extends "layout.html" %}
 
 {% block title %}
-Flights
+Book Search 
 {% endblock %}
 
 {% block body %}
-
-<h1>welcome {{ username }} </h1>
 
 {% if results %}
 <table class="table table-striped">
@@ -22,8 +20,8 @@ Flights
   <tbody>
       {% for book in results %}
     <tr>
-      <th><a href="{{ url_for('book', id=book[0]) }}"><button>Visit</button></a></th>
-      <td><a href="{{ url_for('goodreadsapi', isbn=book[1]) }}">{{ book[1] }}</a></td>
+      <td><a href="{{ url_for('book', id=book[0]) }}"><button class="btn btn-outline-success">Visit</button></a></td>
+      <td><a href="{{ url_for('goodreadsapi', isbn=book[1]) }}"><button class="btn btn-outline-primary">{{ book[1] }}</button></a></td>
       <td>{{ book[2] }}</td>
       <td>{{ book[3] }}</td>
       <td>{{ book[4] }}</td>

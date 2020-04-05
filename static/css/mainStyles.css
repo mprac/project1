@@ -1,0 +1,19 @@
+/* import _scss files here to compile into one .css */
+@media (min-width: 576px) {
+  .form-inline .custom-select, .form-inline .input-group {
+    width: 100%; } }
+
+.table .thead-bg-bookview th {
+  color: #000;
+  background-color: #dee2e6;
+  border-color: #dee2e6; }
+
+@media (min-width: 768px) {
+  .center-bookview {
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 20px; } }
+
+.capitalize-bookview {
+  text-transform: capitalize; }
